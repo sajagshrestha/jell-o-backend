@@ -4,11 +4,13 @@ import { EnvConfigModule } from '@app/env-config';
 
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 import dbConfig from './configs/db.config';
 
 @Module({
-  imports: [EnvConfigModule, TypeOrmModule.forRoot(dbConfig)],
+  imports: [EnvConfigModule, TypeOrmModule.forRoot(dbConfig), AuthModule, UsersModule],
   controllers: [AppController],
   providers: [AppService],
 })
