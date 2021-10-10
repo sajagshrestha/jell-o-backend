@@ -42,10 +42,14 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(username: string): Promise<UserDto> {
+  async findByUsername(username: string, transform = true): Promise<UserDto> {
     const user = await this.userRepository.findOne({ username });
 
-    return toUserDto(user);
+    if (transform) {
+      return toUserDto(user);
+    }
+
+    return user;
   }
 
   async findById(id: string): Promise<UserDto> {

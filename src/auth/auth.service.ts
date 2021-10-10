@@ -50,12 +50,14 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid token');
     }
+
     return user;
   }
 
   private _createToken({ username }: UserDto) {
     const user: JwtPayload = { username };
     const accessToken = this.jwtService.sign(user);
+
     return {
       expiresIn: process.env.EXPIRESIN,
       accessToken,
