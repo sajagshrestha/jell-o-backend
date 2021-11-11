@@ -6,12 +6,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { compare } from 'bcrypt';
-import { toUserDto } from 'src/shared/mapper';
-import { UserDto } from './dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRepository } from './user.repository';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -42,36 +41,29 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(username: string, transform = true): Promise<UserDto> {
+  async findByUsername(username: string): Promise<User> {
     const user = await this.userRepository.findOne({ username });
-
-    if (transform) {
-      return toUserDto(user);
-    }
 
     return user;
   }
 
-  async findById(id: string): Promise<UserDto> {
+  async findById(id: string): Promise<User> {
     const user = await this.userRepository.findOne(id);
 
-    return toUserDto(user);
+    return user;
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: {
         email: email,
       },
     });
 
-    return toUserDto(user);
+    return user;
   }
 
-  async validateUserLogin({
-    username,
-    password,
-  }: UserLoginDto): Promise<UserDto> {
+  async validateUserLogin({ username, password }: UserLoginDto): Promise<User> {
     const user = await this.userRepository.findOne({ username });
 
     if (!user) {
@@ -84,6 +76,6 @@ export class UsersService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return toUserDto(user);
+    return user;
   }
 }

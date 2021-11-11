@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { CommentDto } from 'src/comment/dto/commentDto';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Tag } from '../entities/tag.entity';
 
@@ -16,5 +17,5 @@ export class ImageDto {
 
   tags?: Tag[];
 
-  comments?: Comment[];
+  comments?: CommentDto[];
 }

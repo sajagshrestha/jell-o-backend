@@ -1,5 +1,12 @@
 import * as bcrypt from 'bcrypt';
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { SavedImage } from 'src/images/entities/savedImages.entity';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -17,6 +24,9 @@ export class User {
 
   @Column({ nullable: false })
   password: string;
+
+  @OneToMany(() => SavedImage, (savedImage: SavedImage) => savedImage.user)
+  savedImages: SavedImage[];
 
   @BeforeInsert()
   async hashPassword() {

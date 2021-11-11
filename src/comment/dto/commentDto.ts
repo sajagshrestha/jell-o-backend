@@ -17,4 +17,6 @@ export class CommentDto {
   parentId?: number;
 
   replies?: CommentDto[];
+
+  replies_count?: number;
 }
