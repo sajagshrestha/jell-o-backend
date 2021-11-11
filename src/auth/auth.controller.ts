@@ -21,6 +21,7 @@ export class AuthController {
     if (!result.success) {
       throw new BadRequestException(result.message);
     }
+
     return result;
   }
 

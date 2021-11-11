@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CommentService } from 'src/comment/comment.service';
 import { toImageDto } from 'src/shared/mapper';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateImageDto } from './dto/create-image.dto';
 import { ImageDto } from './dto/image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
@@ -18,13 +19,15 @@ export class ImagesService {
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
     private readonly userService: UsersService,
+
+    private readonly commentService: CommentService,
   ) {}
 
   async create(
     { username }: UserDto,
     createImageDto: CreateImageDto,
-  ): Promise<ImageDto> {
-    const uploader = await this.userService.findByUsername(username, false);
+  ): Promise<Image> {
+    const uploader = await this.userService.findByUsername(username);
 
     const tags = await Promise.all(
       createImageDto.tags.map((name) => this.preloadTagsByName(name)),
@@ -36,36 +39,27 @@ export class ImagesService {
     });
     await this.imageRepository.save(image);
 
-    return toImageDto(image);
+    return image;
   }
 
-  async findAll(): Promise<ImageDto[]> {
+  async findAll(): Promise<Image[]> {
     const images = await this.imageRepository.find();
 
-    return images.map((image) => toImageDto(image));
+    return images;
   }
 
-  async findOne(id: number, transform = true): Promise<ImageDto | Image> {
-    const image = await this.imageRepository.findOne(
-      { id },
-      { relations: ['comments'] },
-    );
+  async findOne(id: number): Promise<Image> {
+    const image = await this.imageRepository.findOne({ id });
+    image.comments = await this.commentService.findParentComments(id);
 
     if (!image) {
       throw new NotFoundException('Image does not exists');
     }
 
-    if (transform) {
-      return toImageDto(image);
-    }
-
     return image;
   }
 
-  async update(
-    id: number,
-    updateImageDto: UpdateImageDto,
-  ): Promise<ImageDto | Image> {
+  async update(id: number, updateImageDto: UpdateImageDto): Promise<Image> {
     const tags =
       updateImageDto.tags &&
       (await Promise.all(
@@ -83,14 +77,32 @@ export class ImagesService {
     }
     await this.imageRepository.save(existingImage);
 
-    return this.findOne(id);
+    return existingImage;
   }
 
-  async remove(id: number): Promise<ImageDto> {
+  async remove(id: number): Promise<Image> {
     const image = await this.imageRepository.findOne(id);
     await this.imageRepository.remove(image);
 
-    return toImageDto(image);
+    return image;
+  }
+
+  async getSimilarImages(id: number): Promise<Image[]> {
+    const image = await this.findOne(id);
+
+    const ids = image.tags.map((t) => t.id);
+
+    const similarImages = this.imageRepository
+      .createQueryBuilder('image')
+      .leftJoinAndSelect('image.uploader', 'uploader')
+      .innerJoinAndSelect('image.tags', 'tags', 'tags.id IN (:...ids)', { ids })
+      .getMany();
+
+    return similarImages;
+  }
+
+  async getUserImages() {
+    return;
   }
 
   private async preloadTagsByName(name: string) {

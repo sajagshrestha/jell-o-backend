@@ -12,22 +12,8 @@ export const toUserDto = (data: User): UserDto => {
   return userDto;
 };
 
-export const toImageDto = (data: Image) => {
-  const { id, title, url, uploader, tags } = data;
-
-  const imageDto: ImageDto = {
-    id,
-    title,
-    url,
-    uploader: toUserDto(uploader),
-    tags,
-  };
-
-  return imageDto;
-};
-
 export const toCommentDto = (data: Comment) => {
-  const { id, body, author, parent, replies, image } = data;
+  const { id, body, author, parent, replies, image, replies_count } = data;
 
   const commentDto: CommentDto = {
     id,
@@ -36,7 +22,25 @@ export const toCommentDto = (data: Comment) => {
     parentId: parent ? parent.id : null,
     replies: replies ? replies.map((reply) => toCommentDto(reply)) : null,
     imageId: image.id,
+    replies_count: replies_count ?? null,
   };
 
   return commentDto;
+};
+
+export const toImageDto = (data: Image) => {
+  const { id, title, url, uploader, tags, comments } = data;
+
+  const imageDto: ImageDto = {
+    id,
+    title,
+    url,
+    uploader: toUserDto(uploader),
+    tags,
+    comments: comments
+      ? comments.map((comment) => toCommentDto(comment))
+      : null,
+  };
+
+  return imageDto;
 };

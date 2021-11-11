@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Image } from 'src/images/entities/image.entity';
 import { ImagesService } from 'src/images/images.service';
-import { toCommentDto } from 'src/shared/mapper';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 import { CommentRepository } from './comment.repository';
-import { CommentDto } from './dto/commentDto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from './entities/comment.entity';
@@ -14,55 +18,81 @@ export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
     private readonly usersService: UsersService,
+
+    @Inject(forwardRef(() => ImagesService))
     private readonly imageService: ImagesService,
   ) {}
 
-  async create({ username }: UserDto, createCommentDto: CreateCommentDto) {
-    const author = await this.usersService.findByUsername(username, false);
+  async create(
+    { username }: UserDto,
+    createCommentDto: CreateCommentDto,
+  ): Promise<Comment> {
+    const author = await this.usersService.findByUsername(username);
 
     const parentComment = createCommentDto.parentId
       ? await this.commentRepository.findOne(createCommentDto.parentId)
       : null;
 
-    const image = await this.imageService.findOne(
-      createCommentDto.imageId,
-      false,
+    const image: Image = <Image>(
+      await this.imageService.findOne(createCommentDto.imageId)
     );
 
     const comment: Comment = this.commentRepository.create({
       ...createCommentDto,
       parent: parentComment,
+      image,
       author,
-      image: image,
     });
     await this.commentRepository.save(comment);
 
-    return toCommentDto(comment);
+    return comment;
   }
 
-  async findAll(id: number) {
-    // const comments
-    return `This action returns all comment`;
+  async findAll(id: number): Promise<Comment[]> {
+    const replies = await this.commentRepository.find({
+      where: {
+        parent: id,
+      },
+    });
+
+    return replies;
   }
 
-  async findOne(id: number): Promise<CommentDto> {
+  async findParentComments(id: number): Promise<Comment[]> {
+    const comments = await this.commentRepository
+      .createQueryBuilder('comment')
+      .where('comment.parent is NULL')
+      .andWhere('comment.image = :id', { id })
+      .leftJoinAndSelect('comment.author', 'author')
+      .leftJoinAndSelect('comment.image', 'image')
+      .loadRelationCountAndMap('comment.replies_count', 'comment.replies')
+      .getMany();
+
+    return comments;
+  }
+
+  async findOne(id: number): Promise<Comment> {
     const comment = await this.commentRepository.findOne({ id });
 
     if (!comment) {
       throw new NotFoundException('Comment no found');
     }
 
-    return toCommentDto(comment);
+    return comment;
   }
 
-  async update(id: number, updateCommentDto: UpdateCommentDto) {
+  async update(
+    id: number,
+    updateCommentDto: UpdateCommentDto,
+  ): Promise<Comment> {
     const comment = await this.commentRepository.preload({
       id: id,
       ...updateCommentDto,
     });
 
-    this.commentRepository.save(comment);
-    return this.commentRepository;
+    await this.commentRepository.save(comment);
+
+    return comment;
   }
 
   remove(id: number) {

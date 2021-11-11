@@ -1,6 +1,6 @@
+import { truncateSync } from 'fs';
 import { type } from 'os';
 import { Comment } from 'src/comment/entities/comment.entity';
-import { Tag } from 'src/images/entities/tag.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
@@ -12,6 +12,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Tag } from './tag.entity';
 
 @Entity()
 export class Image {
@@ -36,6 +37,8 @@ export class Image {
   })
   tags?: Tag[];
 
-  @OneToMany((type) => Comment, (comment: Comment) => comment.author)
+  @OneToMany((type) => Comment, (comment: Comment) => comment.image, {
+    cascade: true,
+  })
   comments: Comment[];
 }

@@ -1,4 +1,3 @@
-import { type } from 'os';
 import { Image } from 'src/images/entities/image.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
@@ -22,7 +21,9 @@ export class Comment {
   })
   author: User;
 
-  @ManyToOne((type) => Image, (image: Image) => image.comments)
+  @ManyToOne((type) => Image, (image: Image) => image.comments, {
+    eager: true,
+  })
   image: Image;
 
   @ManyToOne((type) => Comment, (comment) => comment.replies)
@@ -30,4 +31,6 @@ export class Comment {
 
   @OneToMany((type) => Comment, (comment) => comment.parent)
   replies: Comment[];
+
+  replies_count: number;
 }
