@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentService } from 'src/comment/comment.service';
 import { toImageDto } from 'src/shared/mapper';
@@ -9,18 +14,24 @@ import { CreateImageDto } from './dto/create-image.dto';
 import { ImageDto } from './dto/image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { Image } from './entities/image.entity';
+import { Like } from './entities/like.entity';
+import { SavedImage } from './entities/savedImages.entity';
 import { Tag } from './entities/tag.entity';
 import { ImageRepository } from './image.repository';
 
 @Injectable()
 export class ImagesService {
   constructor(
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
     private readonly imageRepository: ImageRepository,
+    private readonly commentService: CommentService,
     @InjectRepository(Tag)
     private readonly tagRepository: Repository<Tag>,
-    private readonly userService: UsersService,
-
-    private readonly commentService: CommentService,
+    @InjectRepository(Like)
+    private readonly likesRepository: Repository<Like>,
+    @InjectRepository(SavedImage)
+    private readonly savedImageRepository: Repository<SavedImage>,
   ) {}
 
   async create(
@@ -55,6 +66,8 @@ export class ImagesService {
     if (!image) {
       throw new NotFoundException('Image does not exists');
     }
+
+    image.likes_count = await this.likesRepository.count({ image });
 
     return image;
   }
@@ -101,7 +114,66 @@ export class ImagesService {
     return similarImages;
   }
 
-  async getUserImages() {
+  async addSavedImage(id: number, { username }: UserDto): Promise<SavedImage> {
+    const image = await this.imageRepository.findOne(id);
+    const user = await this.userService.findByUsername(username);
+
+    const savedImage = await this.savedImageRepository.create({
+      user,
+      image,
+    });
+
+    return savedImage;
+  }
+
+  async getSavedImages(username: string) {
+    const user = await this.userService.findByUsername(username);
+    const savedImages = await this.savedImageRepository.find({
+      user: user,
+    });
+
+    return savedImages;
+  }
+
+  async addLikes(id: number, { username }: UserDto) {
+    const image = await this.imageRepository.findOne(id);
+    const user = await this.userService.findByUsername(username);
+
+    if (
+      (await this.likesRepository.count({
+        image,
+        user,
+      })) > 0
+    ) {
+      await this.likesRepository.softDelete({
+        image,
+        user,
+      });
+
+      return;
+    }
+
+    if (
+      (await this.likesRepository
+        .createQueryBuilder('like')
+        .where('like.imageId = :imageId', { imageId: id })
+        .andWhere('like.userId = :userId', { userId: user.id })
+        .withDeleted()
+        .getCount()) > 0
+    ) {
+      await this.likesRepository.restore({
+        image,
+        user,
+      });
+
+      return;
+    }
+
+    await this.likesRepository.save({
+      image,
+      user,
+    });
+
     return;
   }
 

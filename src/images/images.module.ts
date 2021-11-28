@@ -8,13 +8,14 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/users/users.module';
 import { CommentModule } from 'src/comment/comment.module';
 import { SavedImage } from './entities/savedImages.entity';
+import { Like } from './entities/like.entity';
 
 @Module({
   imports: [
-    AuthModule,
-    UsersModule,
+    forwardRef(() => AuthModule),
     forwardRef(() => CommentModule),
-    TypeOrmModule.forFeature([ImageRepository, Tag, SavedImage]),
+    forwardRef(() => UsersModule),
+    TypeOrmModule.forFeature([ImageRepository, Tag, SavedImage, Like]),
   ],
   controllers: [ImagesController],
   providers: [ImagesService],

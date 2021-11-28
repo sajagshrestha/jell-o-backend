@@ -1,9 +1,14 @@
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Image } from './image.entity';
 
 @Entity()
-export class SavedImage {
+export class Like {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -14,4 +19,7 @@ export class SavedImage {
     eager: true,
   })
   image: Image;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }

@@ -17,8 +17,8 @@ import { Comment } from './entities/comment.entity';
 export class CommentService {
   constructor(
     private readonly commentRepository: CommentRepository,
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
-
     @Inject(forwardRef(() => ImagesService))
     private readonly imageService: ImagesService,
   ) {}

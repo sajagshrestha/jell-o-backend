@@ -18,4 +18,8 @@ export class ImageDto {
   tags?: Tag[];
 
   comments?: CommentDto[];
+
+  likes_count?: number;
+
+  created_at: Date;
 }

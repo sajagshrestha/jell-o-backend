@@ -8,13 +8,15 @@ import {
   Delete,
   UseGuards,
   Req,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
 import { ImagesService } from './images.service';
 import { CreateImageDto } from './dto/create-image.dto';
 import { UpdateImageDto } from './dto/update-image.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserDto } from 'src/users/dto/user.dto';
-import { toImageDto } from 'src/shared/mapper';
+import { toImageDto, toSavedImageDto } from 'src/shared/mapper';
 
 @Controller('images')
 export class ImagesController {
@@ -51,8 +53,14 @@ export class ImagesController {
     return similarImages.map((image) => toImageDto(image));
   }
 
-  // @Post(':id/save')
-  // async addSavedImage(@Param('id') id: string) {}
+  @Post(':id/save')
+  @UseGuards(AuthGuard())
+  async addSavedImage(@Param('id') id: string, @Req() req: any) {
+    const user = <UserDto>req.user;
+    const savedImage = await this.imagesService.addSavedImage(+id, user);
+
+    return toSavedImageDto(savedImage);
+  }
 
   @Patch(':id')
   @UseGuards(AuthGuard())
@@ -64,5 +72,18 @@ export class ImagesController {
   @UseGuards(AuthGuard())
   remove(@Param('id') id: string) {
     return this.imagesService.remove(+id);
+  }
+
+  @Post(':id/like')
+  @UseGuards(AuthGuard())
+  addLike(@Param('id') id: string, @Req() req: any, @Res() res: any) {
+    const user = <UserDto>req.user;
+    try {
+      this.imagesService.addLikes(+id, user);
+    } catch (e) {
+      return res.status(400).send(e);
+    }
+
+    return res.status(HttpStatus.NO_CONTENT).send();
   }
 }
