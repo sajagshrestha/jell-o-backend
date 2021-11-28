@@ -1,5 +1,3 @@
-import { truncateSync } from 'fs';
-import { type } from 'os';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
@@ -11,6 +9,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Tag } from './tag.entity';
 
@@ -41,4 +40,12 @@ export class Image {
     cascade: true,
   })
   comments: Comment[];
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  likes_count?: number;
 }

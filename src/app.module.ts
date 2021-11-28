@@ -8,7 +8,6 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ImagesModule } from './images/images.module';
 import { CommentModule } from './comment/comment.module';
-import { LikesModule } from './likes/likes.module';
 
 import dbConfig from './configs/db.config';
 
@@ -20,7 +19,6 @@ import dbConfig from './configs/db.config';
     UsersModule,
     ImagesModule,
     CommentModule,
-    LikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

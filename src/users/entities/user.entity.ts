@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import { Image } from 'src/images/entities/image.entity';
 import { SavedImage } from 'src/images/entities/savedImages.entity';
 import {
   BeforeInsert,
@@ -25,8 +26,11 @@ export class User {
   @Column({ nullable: false })
   password: string;
 
+  @OneToMany(() => Image, (image: Image) => image.uploader)
+  images: Promise<Image[]>;
+
   @OneToMany(() => SavedImage, (savedImage: SavedImage) => savedImage.user)
-  savedImages: SavedImage[];
+  savedImages: Promise<SavedImage[]>;
 
   @BeforeInsert()
   async hashPassword() {

@@ -11,8 +11,8 @@ import { ImagesService } from 'src/images/images.service';
 
 @Module({
   imports: [
-    AuthModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
+    forwardRef(() => AuthModule),
     forwardRef(() => ImagesModule),
     TypeOrmModule.forFeature([CommentRepository]),
   ],

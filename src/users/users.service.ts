@@ -1,6 +1,8 @@
 import {
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -11,10 +13,20 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRepository } from './user.repository';
 import { User } from './entities/user.entity';
+import { ImagesService } from 'src/images/images.service';
+import { UserDto } from './dto/user.dto';
+import { SavedImage } from 'src/images/entities/savedImages.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ImageRepository } from 'src/images/image.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    @Inject(forwardRef(() => ImagesService))
+    private readonly imageService: ImagesService,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     const { username, email } = createUserDto;
@@ -77,5 +89,18 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async getUserImages({ username }: UserDto) {
+    const user = await this.findByUsername(username);
+    const images = await user.images;
+
+    return images;
+  }
+
+  async getUserSavedImages({ username }: UserDto) {
+    const savedImages = await this.imageService.getSavedImages(username);
+
+    return savedImages;
   }
 }
