@@ -8,6 +8,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Follow } from './follow.entity';
 
 @Entity()
 export class User {
@@ -31,6 +32,12 @@ export class User {
 
   @OneToMany(() => SavedImage, (savedImage: SavedImage) => savedImage.user)
   savedImages: Promise<SavedImage[]>;
+
+  @OneToMany(() => Follow, (follow: Follow) => follow.following)
+  following: Promise<User[]>;
+
+  @OneToMany(() => Follow, (follow: Follow) => follow.follower)
+  followers: Promise<User[]>;
 
   @BeforeInsert()
   async hashPassword() {

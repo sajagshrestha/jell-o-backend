@@ -8,6 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CommentService } from 'src/comment/comment.service';
 import { toImageDto } from 'src/shared/mapper';
 import { UserDto } from 'src/users/dto/user.dto';
+import { Follow } from 'src/users/entities/follow.entity';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { In, Repository } from 'typeorm';
 import { CreateImageDto } from './dto/create-image.dto';
@@ -53,8 +55,16 @@ export class ImagesService {
     return image;
   }
 
-  async findAll(): Promise<Image[]> {
-    const images = await this.imageRepository.find();
+  async getFeedImages(following: Follow[]): Promise<Image[]> {
+    const images = await this.imageRepository.find({
+      where: {
+        uploader: In(following.map((follow) => follow.following.id)),
+      },
+      relations: ['uploader', 'tags'],
+      order: {
+        updated_at: 'DESC',
+      },
+    });
 
     return images;
   }
@@ -109,6 +119,7 @@ export class ImagesService {
       .createQueryBuilder('image')
       .leftJoinAndSelect('image.uploader', 'uploader')
       .innerJoinAndSelect('image.tags', 'tags', 'tags.id IN (:...ids)', { ids })
+      .where('image.id != :id', { id })
       .getMany();
 
     return similarImages;
@@ -118,7 +129,7 @@ export class ImagesService {
     const image = await this.imageRepository.findOne(id);
     const user = await this.userService.findByUsername(username);
 
-    const savedImage = await this.savedImageRepository.create({
+    const savedImage = await this.savedImageRepository.save({
       user,
       image,
     });

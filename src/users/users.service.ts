@@ -19,6 +19,8 @@ import { SavedImage } from 'src/images/entities/savedImages.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ImageRepository } from 'src/images/image.repository';
+import { Follow } from './entities/follow.entity';
+import { toImageDto } from 'src/shared/mapper';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +28,8 @@ export class UsersService {
     private readonly userRepository: UserRepository,
     @Inject(forwardRef(() => ImagesService))
     private readonly imageService: ImagesService,
+    @InjectRepository(Follow)
+    private readonly followRepository: Repository<Follow>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -102,5 +106,48 @@ export class UsersService {
     const savedImages = await this.imageService.getSavedImages(username);
 
     return savedImages;
+  }
+
+  async followUser(user: User, following: User) {
+    await this.followRepository.save({
+      follower: user,
+      following: following,
+    });
+  }
+
+  async unFollowUser(user: User, following: User) {
+    await this.followRepository.delete({
+      follower: user,
+      following: following,
+    });
+  }
+
+  async getFollowersAndFollowing(user: User) {
+    const followers = await this.followRepository.count({
+      where: {
+        following: user,
+      },
+    });
+    const following = await this.followRepository.count({
+      where: {
+        follower: user,
+      },
+    });
+
+    return {
+      followersCount: followers,
+      followingCunt: following,
+    };
+  }
+
+  async getUserFeeds(user: User) {
+    const following: Follow[] = await this.followRepository.find({
+      where: { follower: user },
+      relations: ['following'],
+    });
+
+    const images = await this.imageService.getFeedImages(following);
+
+    return images;
   }
 }
