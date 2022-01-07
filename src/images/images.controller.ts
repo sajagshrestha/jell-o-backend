@@ -32,13 +32,6 @@ export class ImagesController {
     return toImageDto(image);
   }
 
-  @Get()
-  async findAll() {
-    const images = await this.imagesService.findAll();
-
-    return images.map((image) => toImageDto(image));
-  }
-
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const image = await this.imagesService.findOne(+id);
