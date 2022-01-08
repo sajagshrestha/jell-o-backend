@@ -8,8 +8,11 @@ import {
   Delete,
   UseGuards,
   Req,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Action, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { toCommentDto } from 'src/shared/mapper';
 import { UserDto } from 'src/users/dto/user.dto';
 import { CommentService } from './comment.service';
@@ -19,7 +22,10 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Controller('comment')
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+  constructor(
+    private readonly commentService: CommentService,
+    private caslAbilityFactory: CaslAbilityFactory,
+  ) {}
 
   @Get('/replies/:id')
   async getReplies(@Param('id') id: string): Promise<CommentDto[]> {
@@ -54,7 +60,16 @@ export class CommentController {
 
   @Delete(':id')
   @UseGuards(AuthGuard())
-  remove(@Param('id') id: string) {
-    return this.commentService.remove(+id);
+  async remove(@Param('id') id: string, @Req() req: any, @Res() res: any) {
+    const comment = await this.commentService.findOne(+id);
+    const ability = this.caslAbilityFactory.createForComment(comment, req.user);
+
+    if (ability.can(Action.Delete, comment)) {
+      this.commentService.remove(comment);
+
+      return res.status(HttpStatus.NO_CONTENT).send();
+    }
+
+    return res.status(HttpStatus.FORBIDDEN).send();
   }
 }

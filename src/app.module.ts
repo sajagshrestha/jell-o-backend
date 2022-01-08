@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ImagesModule } from './images/images.module';
 import { CommentModule } from './comment/comment.module';
+import { CaslModule } from './casl/casl.module';
 
 import dbConfig from './configs/db.config';
 
@@ -19,6 +20,7 @@ import dbConfig from './configs/db.config';
     UsersModule,
     ImagesModule,
     CommentModule,
+    CaslModule,
   ],
   controllers: [AppController],
   providers: [AppService],

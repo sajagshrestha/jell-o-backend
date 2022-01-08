@@ -7,10 +7,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from './entities/comment.entity';
 import { CommentRepository } from './comment.repository';
 import { ImagesModule } from 'src/images/images.module';
-import { ImagesService } from 'src/images/images.service';
+import { CaslModule } from 'src/casl/casl.module';
 
 @Module({
   imports: [
+    CaslModule,
     forwardRef(() => UsersModule),
     forwardRef(() => AuthModule),
     forwardRef(() => ImagesModule),

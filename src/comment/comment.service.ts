@@ -95,7 +95,9 @@ export class CommentService {
     return comment;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
+  async remove(comment: Comment) {
+    await this.commentRepository.remove(comment);
+
+    return;
   }
 }

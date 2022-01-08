@@ -9,9 +9,11 @@ import { UsersModule } from 'src/users/users.module';
 import { CommentModule } from 'src/comment/comment.module';
 import { SavedImage } from './entities/savedImages.entity';
 import { Like } from './entities/like.entity';
+import { CaslModule } from 'src/casl/casl.module';
 
 @Module({
   imports: [
+    CaslModule,
     forwardRef(() => AuthModule),
     forwardRef(() => CommentModule),
     forwardRef(() => UsersModule),

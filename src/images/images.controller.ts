@@ -17,10 +17,15 @@ import { UpdateImageDto } from './dto/update-image.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserDto } from 'src/users/dto/user.dto';
 import { toImageDto, toSavedImageDto } from 'src/shared/mapper';
+import { Action, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('images')
 export class ImagesController {
-  constructor(private readonly imagesService: ImagesService) {}
+  constructor(
+    private readonly imagesService: ImagesService,
+    private caslAbilityFactory: CaslAbilityFactory,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard())
@@ -57,8 +62,23 @@ export class ImagesController {
 
   @Patch(':id')
   @UseGuards(AuthGuard())
-  update(@Param('id') id: string, @Body() updateImageDto: UpdateImageDto) {
-    return this.imagesService.update(+id, updateImageDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateImageDto: UpdateImageDto,
+    @Req() req: any,
+    @Res() res: any,
+  ) {
+    const user = <User>req.user;
+    const image = await this.imagesService.findOne(+id);
+    const ability = this.caslAbilityFactory.createForUser(user);
+
+    if (ability.cannot(Action.Update, image)) {
+      return res.status(HttpStatus.FORBIDDEN).send();
+    }
+
+    await this.imagesService.update(+id, updateImageDto);
+
+    return toImageDto(image);
   }
 
   @Delete(':id')
