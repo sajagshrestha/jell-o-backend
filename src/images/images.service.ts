@@ -83,16 +83,14 @@ export class ImagesService {
   }
 
   async update(id: number, updateImageDto: UpdateImageDto): Promise<Image> {
-    const tags =
-      updateImageDto.tags &&
-      (await Promise.all(
-        updateImageDto.tags.map((name) => this.preloadTagsByName(name)),
-      ));
+    const tags = await Promise.all(
+      updateImageDto.tags.map((name) => this.preloadTagsByName(name)),
+    );
 
     const existingImage = await this.imageRepository.preload({
       id: id,
       ...updateImageDto,
-      tags,
+      tags: tags,
     });
 
     if (!existingImage) {
