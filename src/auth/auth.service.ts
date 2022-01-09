@@ -20,7 +20,6 @@ export class AuthService {
       success: true,
       message: 'User registered successfully',
       username: '',
-      token: '',
     };
 
     try {
@@ -30,7 +29,7 @@ export class AuthService {
       status = {
         ...status,
         username: createUserDto.username,
-        token,
+        ...token,
       };
     } catch (err) {
       status = {
