@@ -19,10 +19,19 @@ export class AuthService {
     let status: RegistrationStatus = {
       success: true,
       message: 'User registered successfully',
+      username: '',
+      token: '',
     };
 
     try {
-      await this.userService.create(createUserDto);
+      const createdUser = await this.userService.create(createUserDto);
+      const token = this._createToken(createdUser);
+
+      status = {
+        ...status,
+        username: createUserDto.username,
+        token,
+      };
     } catch (err) {
       status = {
         success: false,
