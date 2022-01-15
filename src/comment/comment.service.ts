@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Image } from 'src/images/entities/image.entity';
-import { ImagesService } from 'src/images/images.service';
+import { ImagesService } from 'src/images/services/images.service';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 import { CommentRepository } from './comment.repository';

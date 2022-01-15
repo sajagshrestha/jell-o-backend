@@ -17,7 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { toImageDto, toSavedImageDto, toUserDto } from 'src/shared/mapper';
 import { AuthGuard } from '@nestjs/passport';
 import { UserDto } from './dto/user.dto';
-import { ImagesService } from 'src/images/images.service';
+import { ImagesService } from 'src/images/services/images.service';
 import { User } from './entities/user.entity';
 
 @Controller('users')

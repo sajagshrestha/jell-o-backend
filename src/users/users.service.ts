@@ -13,12 +13,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRepository } from './user.repository';
 import { User } from './entities/user.entity';
-import { ImagesService } from 'src/images/images.service';
+import { ImagesService } from 'src/images/services/images.service';
 import { UserDto } from './dto/user.dto';
 import { SavedImage } from 'src/images/entities/savedImages.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ImageRepository } from 'src/images/image.repository';
+import { ImageRepository } from 'src/images/repositories/image.repository';
 import { Follow } from './entities/follow.entity';
 import { toImageDto } from 'src/shared/mapper';
 

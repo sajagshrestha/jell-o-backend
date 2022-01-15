@@ -11,14 +11,17 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import { ImagesService } from './images.service';
-import { CreateImageDto } from './dto/create-image.dto';
-import { UpdateImageDto } from './dto/update-image.dto';
+import { ImagesService } from '../services/images.service';
+import { CreateImageDto } from '../dto/create-image.dto';
+import { UpdateImageDto } from '../dto/update-image.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserDto } from 'src/users/dto/user.dto';
 import { toImageDto, toSavedImageDto } from 'src/shared/mapper';
 import { Action, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { User } from 'src/users/entities/user.entity';
+import { ImageDto } from '../dto/image.dto';
+import { Image } from '../entities/image.entity';
+import { DateTime } from 'luxon';
 
 @Controller('images')
 export class ImagesController {
@@ -35,6 +38,14 @@ export class ImagesController {
     const image = await this.imagesService.create(user, createImageDto);
 
     return toImageDto(image);
+  }
+
+  @Get('popular')
+  async getPopularImages() {
+    // return DateTime.now().minus({ months: 1 }).toJSDate();
+    const popularImages = await this.imagesService.getPopularImages();
+
+    return popularImages.map((img: Image) => toImageDto(img));
   }
 
   @Get(':id')

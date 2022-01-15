@@ -31,13 +31,23 @@ export const toCommentDto = (data: Comment) => {
 };
 
 export const toImageDto = (data: Image) => {
-  const { id, title, url, uploader, tags, comments, created_at, likes_count } =
-    data;
+  const {
+    id,
+    caption,
+    url,
+    thumbnailUrl,
+    uploader,
+    tags,
+    comments,
+    created_at,
+    likes_count,
+  } = data;
 
   const imageDto: ImageDto = {
     id,
-    title,
+    caption: caption ?? '',
     url,
+    thumbnailUrl: thumbnailUrl ?? '',
     uploader: uploader ? toUserDto(uploader) : null,
     tags,
     comments: comments

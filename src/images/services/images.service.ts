@@ -5,21 +5,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { DateTime } from 'luxon';
 import { CommentService } from 'src/comment/comment.service';
-import { toImageDto } from 'src/shared/mapper';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Follow } from 'src/users/entities/follow.entity';
-import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { In, Repository } from 'typeorm';
-import { CreateImageDto } from './dto/create-image.dto';
-import { ImageDto } from './dto/image.dto';
-import { UpdateImageDto } from './dto/update-image.dto';
-import { Image } from './entities/image.entity';
-import { Like } from './entities/like.entity';
-import { SavedImage } from './entities/savedImages.entity';
-import { Tag } from './entities/tag.entity';
-import { ImageRepository } from './image.repository';
+import { In, MoreThan, Repository } from 'typeorm';
+import { CreateImageDto } from '../dto/create-image.dto';
+import { UpdateImageDto } from '../dto/update-image.dto';
+import { Image } from '../entities/image.entity';
+import { Like } from '../entities/like.entity';
+import { SavedImage } from '../entities/savedImages.entity';
+import { ImageRepository } from '../repositories/image.repository';
+import { TagService } from './tags.service';
 
 @Injectable()
 export class ImagesService {
@@ -28,8 +26,7 @@ export class ImagesService {
     private readonly userService: UsersService,
     private readonly imageRepository: ImageRepository,
     private readonly commentService: CommentService,
-    @InjectRepository(Tag)
-    private readonly tagRepository: Repository<Tag>,
+    private readonly tagService: TagService,
     @InjectRepository(Like)
     private readonly likesRepository: Repository<Like>,
     @InjectRepository(SavedImage)
@@ -45,11 +42,13 @@ export class ImagesService {
     const tags = await Promise.all(
       createImageDto.tags.map((name) => this.preloadTagsByName(name)),
     );
+
     const image = this.imageRepository.create({
       ...createImageDto,
       tags,
       uploader,
     });
+
     await this.imageRepository.save(image);
 
     return image;
@@ -65,6 +64,23 @@ export class ImagesService {
         updated_at: 'DESC',
       },
     });
+
+    return images;
+  }
+
+  async getPopularImages(): Promise<Image[]> {
+    // const images = await this.imageRepository.find({
+    //   where: {
+    //     created_at: MoreThan(DateTime.now().minus({ weeks: 1 }).toString()),
+    //   },
+    //   relations: ['uploader', 'tags'],
+    //   order: {
+    //     updated_at: 'DESC',
+    //   },
+    //   take: 20,
+    // });
+
+    const images = await this.imageRepository.getPopular();
 
     return images;
   }
@@ -187,12 +203,12 @@ export class ImagesService {
   }
 
   private async preloadTagsByName(name: string) {
-    const existingTag = await this.tagRepository.findOne({ name });
+    const existingTag = await this.tagService.findOne(name);
 
     if (existingTag) {
       return existingTag;
     }
 
-    return this.tagRepository.create({ name });
+    return this.tagService.create(name);
   }
 }

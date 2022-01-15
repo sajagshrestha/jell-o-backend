@@ -15,9 +15,7 @@ export class Like {
   @ManyToOne(() => User)
   user: User;
 
-  @ManyToOne(() => Image, {
-    eager: true,
-  })
+  @ManyToOne(() => Image)
   image: Image;
 
   @DeleteDateColumn()
