@@ -22,7 +22,13 @@ export class ImageDto {
 
   comments?: CommentDto[];
 
-  likes_count?: number;
+  likeCount?: number;
+
+  commentCount?: number;
+
+  isLiked?: boolean;
+
+  isSaved?: boolean;
 
   created_at: Date;
 }

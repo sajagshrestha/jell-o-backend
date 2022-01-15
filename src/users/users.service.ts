@@ -146,7 +146,7 @@ export class UsersService {
       relations: ['following'],
     });
 
-    const images = await this.imageService.getFeedImages(following);
+    const images = await this.imageService.getFeedImages(user, following);
 
     return images;
   }

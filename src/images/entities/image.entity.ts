@@ -56,5 +56,18 @@ export class Image {
   @UpdateDateColumn()
   updated_at: Date;
 
-  likes_count?: number;
+  likeCount: number;
+
+  commentCount?: number;
+
+  /**
+   * TypeORM does bot support select and map as of now. This is a workaround method.
+   * It counts the row of like table with image id and user id and if it is greater than 1 user has liked the image.
+   * Also we could use exist query for boolean value but I am too lazy for that.
+   */
+  @Column({ nullable: true, insert: false, select: false })
+  isLiked: number;
+
+  @Column({ nullable: true, insert: false, select: false })
+  isSaved: number;
 }

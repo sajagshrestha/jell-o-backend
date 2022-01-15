@@ -40,7 +40,10 @@ export const toImageDto = (data: Image) => {
     tags,
     comments,
     created_at,
-    likes_count,
+    likeCount,
+    commentCount,
+    isLiked,
+    isSaved,
   } = data;
 
   const imageDto: ImageDto = {
@@ -54,7 +57,10 @@ export const toImageDto = (data: Image) => {
       ? comments.map((comment) => toCommentDto(comment))
       : null,
     created_at: created_at,
-    likes_count: likes_count ?? null,
+    likeCount: likeCount ?? null,
+    commentCount: commentCount == undefined ? 0 : commentCount,
+    isLiked: isLiked ? isLiked > 0 : false,
+    isSaved: isSaved ? isSaved > 0 : false,
   };
 
   return imageDto;
