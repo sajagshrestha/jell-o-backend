@@ -29,7 +29,7 @@ export class CommentController {
 
   @Get('/replies/:id')
   async getReplies(@Param('id') id: string): Promise<CommentDto[]> {
-    const comments = await this.commentService.findAll(+id);
+    const comments = await this.commentService.findReplies(+id);
 
     return comments.map((comment) => toCommentDto(comment));
   }

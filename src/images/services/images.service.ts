@@ -5,12 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DateTime } from 'luxon';
 import { CommentService } from 'src/comment/comment.service';
 import { UserDto } from 'src/users/dto/user.dto';
 import { Follow } from 'src/users/entities/follow.entity';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { In, MoreThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateImageDto } from '../dto/create-image.dto';
 import { UpdateImageDto } from '../dto/update-image.dto';
 import { Image } from '../entities/image.entity';
@@ -33,12 +33,29 @@ export class ImagesService {
     private readonly savedImageRepository: Repository<SavedImage>,
   ) {}
 
-  async create(
-    { username }: UserDto,
-    createImageDto: CreateImageDto,
-  ): Promise<Image> {
-    const uploader = await this.userService.findByUsername(username);
+  async findOne(id: number): Promise<Image> {
+    const image = await this.imageRepository.findOne({ id });
 
+    if (!image) {
+      throw new NotFoundException('Image does not exists');
+    }
+
+    return image;
+  }
+
+  async fetchWithDetail(id: number, user: User): Promise<Image> {
+    const image = await this.imageRepository.getOneWithDetail(id, user);
+
+    if (!image) {
+      throw new NotFoundException('Image does not exists');
+    }
+
+    image.comments = await this.commentService.findParentComments(image.id);
+
+    return image;
+  }
+
+  async create(uploader: User, createImageDto: CreateImageDto): Promise<Image> {
     const tags = await Promise.all(
       createImageDto.tags.map((name) => this.preloadTagsByName(name)),
     );
@@ -46,56 +63,25 @@ export class ImagesService {
     const image = this.imageRepository.create({
       ...createImageDto,
       tags,
-      uploader,
+      uploader: uploader,
     });
 
     await this.imageRepository.save(image);
 
-    return image;
+    return await this.fetchWithDetail(image.id, uploader);
   }
 
-  async getFeedImages(following: Follow[]): Promise<Image[]> {
-    const images = await this.imageRepository.find({
-      where: {
-        uploader: In(following.map((follow) => follow.following.id)),
-      },
-      relations: ['uploader', 'tags'],
-      order: {
-        updated_at: 'DESC',
-      },
-    });
+  async getFeedImages(user: User, following: Follow[]): Promise<Image[]> {
+    const followingIds = following.map((follow) => follow.following.id);
+    const images = await this.imageRepository.getFeed(user, followingIds);
 
     return images;
   }
 
-  async getPopularImages(): Promise<Image[]> {
-    // const images = await this.imageRepository.find({
-    //   where: {
-    //     created_at: MoreThan(DateTime.now().minus({ weeks: 1 }).toString()),
-    //   },
-    //   relations: ['uploader', 'tags'],
-    //   order: {
-    //     updated_at: 'DESC',
-    //   },
-    //   take: 20,
-    // });
-
-    const images = await this.imageRepository.getPopular();
+  async getPopularImages(user: User) {
+    const images = await this.imageRepository.getPopular(user);
 
     return images;
-  }
-
-  async findOne(id: number): Promise<Image> {
-    const image = await this.imageRepository.findOne({ id });
-    image.comments = await this.commentService.findParentComments(id);
-
-    if (!image) {
-      throw new NotFoundException('Image does not exists');
-    }
-
-    image.likes_count = await this.likesRepository.count({ image });
-
-    return image;
   }
 
   async update(id: number, updateImageDto: UpdateImageDto): Promise<Image> {
@@ -124,25 +110,18 @@ export class ImagesService {
     return image;
   }
 
-  async getSimilarImages(id: number): Promise<Image[]> {
+  async getSimilarImages(id: number, user: User): Promise<Image[]> {
     const image = await this.findOne(id);
 
-    const ids = image.tags.map((t) => t.id);
+    const tagIds = image.tags.map((t) => t.id);
 
-    const similarImages = this.imageRepository
-      .createQueryBuilder('image')
-      .leftJoinAndSelect('image.uploader', 'uploader')
-      .innerJoinAndSelect('image.tags', 'tags', 'tags.id IN (:...ids)', { ids })
-      .where('image.id != :id', { id })
-      .getMany();
+    const similarImages = this.imageRepository.getSimilar(id, user, tagIds);
 
     return similarImages;
   }
 
-  async addSavedImage(id: number, { username }: UserDto): Promise<SavedImage> {
+  async addSavedImage(id: number, user: User): Promise<SavedImage> {
     const image = await this.imageRepository.findOne(id);
-    const user = await this.userService.findByUsername(username);
-
     const savedImage = await this.savedImageRepository.save({
       user,
       image,

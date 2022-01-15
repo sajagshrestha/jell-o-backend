@@ -19,9 +19,8 @@ import { UserDto } from 'src/users/dto/user.dto';
 import { toImageDto, toSavedImageDto } from 'src/shared/mapper';
 import { Action, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { User } from 'src/users/entities/user.entity';
-import { ImageDto } from '../dto/image.dto';
 import { Image } from '../entities/image.entity';
-import { DateTime } from 'luxon';
+import { RequestWithUser } from 'src/interface/RequestWithUser';
 
 @Controller('images')
 export class ImagesController {
@@ -32,41 +31,46 @@ export class ImagesController {
 
   @Post()
   @UseGuards(AuthGuard())
-  async create(@Body() createImageDto: CreateImageDto, @Req() req: any) {
-    const user = <UserDto>req.user;
-
-    const image = await this.imagesService.create(user, createImageDto);
+  async create(
+    @Body() createImageDto: CreateImageDto,
+    @Req() req: RequestWithUser,
+  ) {
+    const image = await this.imagesService.create(req.user, createImageDto);
 
     return toImageDto(image);
   }
 
   @Get('popular')
-  async getPopularImages() {
-    // return DateTime.now().minus({ months: 1 }).toJSDate();
-    const popularImages = await this.imagesService.getPopularImages();
+  @UseGuards(AuthGuard())
+  async getPopularImages(@Req() req: RequestWithUser) {
+    const popularImages = await this.imagesService.getPopularImages(req.user);
 
     return popularImages.map((img: Image) => toImageDto(img));
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const image = await this.imagesService.findOne(+id);
+  @UseGuards(AuthGuard())
+  async findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
+    const image = await this.imagesService.fetchWithDetail(+id, req.user);
 
     return toImageDto(image);
   }
 
   @Get(':id/similar')
-  async getSimilarImage(@Param('id') id: string) {
-    const similarImages = await this.imagesService.getSimilarImages(+id);
+  @UseGuards(AuthGuard())
+  async getSimilarImage(@Param('id') id: string, @Req() req: RequestWithUser) {
+    const similarImages = await this.imagesService.getSimilarImages(
+      +id,
+      req.user,
+    );
 
     return similarImages.map((image) => toImageDto(image));
   }
 
   @Post(':id/save')
   @UseGuards(AuthGuard())
-  async addSavedImage(@Param('id') id: string, @Req() req: any) {
-    const user = <UserDto>req.user;
-    const savedImage = await this.imagesService.addSavedImage(+id, user);
+  async addSavedImage(@Param('id') id: string, @Req() req: RequestWithUser) {
+    const savedImage = await this.imagesService.addSavedImage(+id, req.user);
 
     return toSavedImageDto(savedImage);
   }
@@ -76,12 +80,11 @@ export class ImagesController {
   async update(
     @Param('id') id: string,
     @Body() updateImageDto: UpdateImageDto,
-    @Req() req: any,
+    @Req() req: RequestWithUser,
     @Res() res: any,
   ) {
-    const user = <User>req.user;
     const image = await this.imagesService.findOne(+id);
-    const ability = this.caslAbilityFactory.createForUser(user);
+    const ability = this.caslAbilityFactory.createForUser(req.user);
 
     if (ability.cannot(Action.Update, image)) {
       return res.status(HttpStatus.FORBIDDEN).send();
@@ -100,10 +103,13 @@ export class ImagesController {
 
   @Post(':id/like')
   @UseGuards(AuthGuard())
-  addLike(@Param('id') id: string, @Req() req: any, @Res() res: any) {
-    const user = <UserDto>req.user;
+  addLike(
+    @Param('id') id: string,
+    @Req() req: RequestWithUser,
+    @Res() res: any,
+  ) {
     try {
-      this.imagesService.addLikes(+id, user);
+      this.imagesService.addLikes(+id, req.user);
     } catch (e) {
       return res.status(400).send(e);
     }

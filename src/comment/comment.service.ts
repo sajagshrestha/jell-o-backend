@@ -48,7 +48,7 @@ export class CommentService {
     return comment;
   }
 
-  async findAll(id: number): Promise<Comment[]> {
+  async findReplies(id: number): Promise<Comment[]> {
     const replies = await this.commentRepository.find({
       where: {
         parent: id,
