@@ -47,7 +47,7 @@ export class ImageRepository extends Repository<Image> {
   getFeed(user: User, followerIds: number[]) {
     return this.baseQueryBuilder(user)
       .where('image.uploader.id IN (:...followerIds)', { followerIds })
-      .orderBy('updated_at', 'DESC')
+      .orderBy('image.updated_at', 'DESC')
       .getMany();
   }
 
@@ -83,6 +83,12 @@ export class ImageRepository extends Repository<Image> {
       .where('image.uploader.id = :userId', {
         userId: user.id,
       })
+      .getMany();
+  }
+
+  getManyWithDetail(imageIds: number[], user: User) {
+    return this.baseQueryBuilder(user)
+      .where('image.id IN (:...imageIds)', { imageIds })
       .getMany();
   }
 }

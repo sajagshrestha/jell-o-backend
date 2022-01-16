@@ -33,7 +33,7 @@ export class UsersController {
   async getSavedImages(@Req() req: RequestWithUser) {
     const savedImages = await this.usersService.getUserSavedImages(req.user);
 
-    return savedImages.map((savedImage) => toSavedImageDto(savedImage));
+    return savedImages.map((savedImage) => toImageDto(savedImage));
   }
 
   @Get('images')
