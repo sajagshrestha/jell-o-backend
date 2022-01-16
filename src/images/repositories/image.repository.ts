@@ -16,7 +16,7 @@ export class ImageRepository extends Repository<Image> {
           subQuery
             .select('COUNT(L.id)', 'count')
             .from('like', 'L')
-            .where('L.user.id = :userId', { userId: user.id })
+            .where('L.user.id = :authUserId', { authUserId: user.id })
             .andWhere('L.image.id = image.id'),
         'image_isLiked',
       )

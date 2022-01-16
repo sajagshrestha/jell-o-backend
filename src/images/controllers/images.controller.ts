@@ -10,6 +10,7 @@ import {
   Req,
   Res,
   HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { ImagesService } from '../services/images.service';
 import { CreateImageDto } from '../dto/create-image.dto';
@@ -68,11 +69,20 @@ export class ImagesController {
   }
 
   @Post(':id/save')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard())
   async addSavedImage(@Param('id') id: string, @Req() req: RequestWithUser) {
-    const savedImage = await this.imagesService.addSavedImage(+id, req.user);
+    await this.imagesService.addSavedImage(+id, req.user);
 
-    return toSavedImageDto(savedImage);
+    return { message: 'Successfully saved image' };
+  }
+
+  @Delete(':id/save')
+  @UseGuards(AuthGuard())
+  async removeSavedImage(@Param('id') id: string, @Req() req: RequestWithUser) {
+    await this.imagesService.removeSavedImage(+id, req.user);
+
+    return { message: 'Successfully removed saved image' };
   }
 
   @Patch(':id')
