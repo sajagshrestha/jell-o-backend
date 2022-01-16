@@ -21,6 +21,7 @@ import { Repository } from 'typeorm';
 import { ImageRepository } from 'src/images/repositories/image.repository';
 import { Follow } from './entities/follow.entity';
 import { toImageDto } from 'src/shared/mapper';
+import { Image } from 'src/images/entities/image.entity';
 
 @Injectable()
 export class UsersService {
@@ -95,15 +96,14 @@ export class UsersService {
     return user;
   }
 
-  async getUserImages({ username }: UserDto) {
-    const user = await this.findByUsername(username);
+  async getUserImages(user: User) {
     const images = await user.images;
 
     return images;
   }
 
-  async getUserSavedImages({ username }: UserDto) {
-    const savedImages = await this.imageService.getSavedImages(username);
+  async getUserSavedImages(user: User) {
+    const savedImages = await this.imageService.getSavedImages(user);
 
     return savedImages;
   }
@@ -123,20 +123,20 @@ export class UsersService {
   }
 
   async getFollowersAndFollowing(user: User) {
-    const followers = await this.followRepository.count({
+    const followerCount = await this.followRepository.count({
       where: {
         following: user,
       },
     });
-    const following = await this.followRepository.count({
+    const followingCount = await this.followRepository.count({
       where: {
         follower: user,
       },
     });
 
     return {
-      followersCount: followers,
-      followingCunt: following,
+      followerCount,
+      followingCount,
     };
   }
 
@@ -149,5 +149,27 @@ export class UsersService {
     const images = await this.imageService.getFeedImages(user, following);
 
     return images;
+  }
+
+  async isFollowing(user: User, follower: User): Promise<boolean> {
+    const count = await this.followRepository.count({
+      where: {
+        following: user,
+        follower: follower,
+      },
+    });
+
+    return count > 0;
+  }
+
+  async profile(user: User, currentUser: User) {
+    const images = await this.imageService.getUserImage(user, currentUser);
+    const { followerCount, followingCount } =
+      await this.getFollowersAndFollowing(user);
+    user.followerCount = followerCount;
+    user.followingCount = followingCount;
+    user.isFollowing = await this.isFollowing(user, currentUser);
+
+    return { userProfile: user, images };
   }
 }

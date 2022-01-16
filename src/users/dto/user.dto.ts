@@ -6,4 +6,10 @@ export class UserDto {
 
   @IsNotEmpty()
   username: string;
+
+  followerCount?: number;
+
+  followingCount?: number;
+
+  isFollowing?: boolean;
 }

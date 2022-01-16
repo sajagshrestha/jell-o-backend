@@ -36,6 +36,12 @@ export class User {
   @OneToMany(() => Follow, (follow: Follow) => follow.follower)
   followers: Promise<User[]>;
 
+  followerCount?: number;
+
+  followingCount?: number;
+
+  isFollowing?: boolean;
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);

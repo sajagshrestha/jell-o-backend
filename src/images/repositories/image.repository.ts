@@ -77,4 +77,12 @@ export class ImageRepository extends Repository<Image> {
       .where('image.id != :id', { id })
       .getMany();
   }
+
+  getUserImages(user: User, authUser: User) {
+    return this.baseQueryBuilder(authUser)
+      .where('image.uploader.id = :userId', {
+        userId: user.id,
+      })
+      .getMany();
+  }
 }
