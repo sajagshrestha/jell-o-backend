@@ -134,6 +134,15 @@ export class ImagesService {
     return savedImage;
   }
 
+  async removeSavedImage(id: number, user: User) {
+    const image = await this.findOne(id);
+
+    return await this.savedImageRepository.delete({
+      user,
+      image,
+    });
+  }
+
   async getSavedImages(user: User) {
     const savedImages = await this.savedImageRepository.find({
       user: user,
