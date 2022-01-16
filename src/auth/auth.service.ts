@@ -28,6 +28,7 @@ export class AuthService {
 
       status = {
         ...status,
+        id: createdUser.id,
         username: createUserDto.username,
         ...token,
       };
@@ -47,6 +48,7 @@ export class AuthService {
     const token = this._createToken(user);
 
     return {
+      id: user.id,
       username: user.username,
       ...token,
     };
@@ -62,8 +64,8 @@ export class AuthService {
     return user;
   }
 
-  private _createToken({ username }: UserDto) {
-    const user: JwtPayload = { username };
+  private _createToken({ id, username }: UserDto) {
+    const user: JwtPayload = { id, username };
     const accessToken = this.jwtService.sign(user);
 
     return {
