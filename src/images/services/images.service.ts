@@ -71,8 +71,11 @@ export class ImagesService {
     return await this.fetchWithDetail(image.id, uploader);
   }
 
-  async getFeedImages(user: User, following: Follow[]): Promise<Image[]> {
+  async getFeedImages(user: User, following: Follow[]) {
     const followingIds = following.map((follow) => follow.following.id);
+    if (followingIds.length === 0) {
+      return [];
+    }
     const images = await this.imageRepository.getFeed(user, followingIds);
 
     return images;
@@ -148,7 +151,18 @@ export class ImagesService {
       user: user,
     });
 
-    return savedImages;
+    if (savedImages.length === 0) {
+      return [];
+    }
+
+    const savedImagesIds = savedImages.map((savedImage) => savedImage.image.id);
+
+    const images = await this.imageRepository.getManyWithDetail(
+      savedImagesIds,
+      user,
+    );
+
+    return images;
   }
 
   async addLikes(id: number, user: User) {
