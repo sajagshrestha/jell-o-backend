@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UserLoginDto } from 'src/users/dto/user-login.dto';
 import { UserDto } from 'src/users/dto/user.dto';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { LoginStatus } from './interfaces/login-status.interface';
 import { JwtPayload } from './interfaces/payload.interface';
@@ -54,7 +55,7 @@ export class AuthService {
     };
   }
 
-  async validateUser(payload: JwtPayload): Promise<UserDto> {
+  async validateUser(payload: JwtPayload): Promise<User> {
     const { username } = payload;
     const user = await this.userService.findByUsername(username);
     if (!user) {
@@ -64,7 +65,7 @@ export class AuthService {
     return user;
   }
 
-  private _createToken({ id, username }: UserDto) {
+  private _createToken({ id, username }: User) {
     const user: JwtPayload = { id, username };
     const accessToken = this.jwtService.sign(user);
 

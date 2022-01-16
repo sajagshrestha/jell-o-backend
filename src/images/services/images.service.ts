@@ -84,6 +84,20 @@ export class ImagesService {
     return images;
   }
 
+  async getSimilarImages(id: number, user: User): Promise<Image[]> {
+    const image = await this.findOne(id);
+
+    const tagIds = image.tags.map((t) => t.id);
+
+    const similarImages = this.imageRepository.getSimilar(id, user, tagIds);
+
+    return similarImages;
+  }
+
+  async getUserImage(user: User, authUser: User) {
+    return await this.imageRepository.getUserImages(user, authUser);
+  }
+
   async update(id: number, updateImageDto: UpdateImageDto): Promise<Image> {
     const tags = await Promise.all(
       updateImageDto.tags.map((name) => this.preloadTagsByName(name)),
@@ -110,16 +124,6 @@ export class ImagesService {
     return image;
   }
 
-  async getSimilarImages(id: number, user: User): Promise<Image[]> {
-    const image = await this.findOne(id);
-
-    const tagIds = image.tags.map((t) => t.id);
-
-    const similarImages = this.imageRepository.getSimilar(id, user, tagIds);
-
-    return similarImages;
-  }
-
   async addSavedImage(id: number, user: User): Promise<SavedImage> {
     const image = await this.imageRepository.findOne(id);
     const savedImage = await this.savedImageRepository.save({
@@ -130,8 +134,7 @@ export class ImagesService {
     return savedImage;
   }
 
-  async getSavedImages(username: string) {
-    const user = await this.userService.findByUsername(username);
+  async getSavedImages(user: User) {
     const savedImages = await this.savedImageRepository.find({
       user: user,
     });
@@ -139,9 +142,8 @@ export class ImagesService {
     return savedImages;
   }
 
-  async addLikes(id: number, { username }: UserDto) {
+  async addLikes(id: number, user: User) {
     const image = await this.imageRepository.findOne(id);
-    const user = await this.userService.findByUsername(username);
 
     if (
       (await this.likesRepository.count({
