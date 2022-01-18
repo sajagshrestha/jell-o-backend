@@ -91,4 +91,11 @@ export class ImageRepository extends Repository<Image> {
       .where('image.id IN (:...imageIds)', { imageIds })
       .getMany();
   }
+
+  search(query: string, user: User, take = 10) {
+    return this.baseQueryBuilder(user)
+      .where('caption LIKE :query', { query: `%${query}%` })
+      .take(take)
+      .getMany();
+  }
 }

@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { ImagesModule } from './images/images.module';
 import { CommentModule } from './comment/comment.module';
 import { CaslModule } from './casl/casl.module';
+import { SearchModule } from './search/search.module';
 
 import dbConfig from './configs/db.config';
 
@@ -21,6 +22,7 @@ import dbConfig from './configs/db.config';
     ImagesModule,
     CommentModule,
     CaslModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
