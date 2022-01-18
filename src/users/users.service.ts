@@ -172,4 +172,8 @@ export class UsersService {
 
     return { userProfile: user, images };
   }
+
+  async search(query: string) {
+    return this.userRepository.search(query);
+  }
 }

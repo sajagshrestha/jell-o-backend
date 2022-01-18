@@ -206,6 +206,10 @@ export class ImagesService {
     return;
   }
 
+  async search(query: string, user: User) {
+    return this.imageRepository.search(query, user);
+  }
+
   private async preloadTagsByName(name: string) {
     const existingTag = await this.tagService.findOne(name);
 
