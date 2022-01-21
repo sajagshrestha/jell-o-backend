@@ -9,4 +9,9 @@ export class TagsController {
   async search(@Query('search') search: string) {
     return this.tagService.find(search);
   }
+
+  @Get('popular')
+  async popular() {
+    return await this.tagService.popular();
+  }
 }

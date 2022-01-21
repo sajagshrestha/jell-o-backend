@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { Like } from 'typeorm';
 import { Tag } from '../entities/tag.entity';
 import { TagRepository } from '../repositories/tag.repository';
+import { ImagesService } from './images.service';
 
 @Injectable()
 export class TagService {
-  constructor(private readonly tagRepository: TagRepository) {}
+  constructor(
+    private readonly tagRepository: TagRepository,
+    @Inject(forwardRef(() => ImagesService))
+    private readonly imageService: ImagesService,
+  ) {}
 
   async create(name: string) {
     return await this.tagRepository.save({ name });
@@ -28,5 +33,17 @@ export class TagService {
     }
 
     return [];
+  }
+
+  async popular() {
+    const rawTags = await this.imageService.getPopularTags();
+
+    const tags: Tag[] = rawTags.map((tag) => ({
+      id: tag.id,
+      name: tag.name,
+      imageCount: tag.count,
+    }));
+
+    return tags;
   }
 }
