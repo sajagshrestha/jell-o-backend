@@ -9,6 +9,8 @@ export class Tag {
   @Column()
   name: string;
 
-  @ManyToMany((type) => Image, (image) => image.tags)
-  images: Image[];
+  @ManyToMany(() => Image, (image) => image.tags)
+  images?: Image[];
+
+  imageCount?: number;
 }

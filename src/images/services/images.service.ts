@@ -26,6 +26,7 @@ export class ImagesService {
     private readonly userService: UsersService,
     private readonly imageRepository: ImageRepository,
     private readonly commentService: CommentService,
+    @Inject(forwardRef(() => TagService))
     private readonly tagService: TagService,
     @InjectRepository(Like)
     private readonly likesRepository: Repository<Like>,
@@ -208,6 +209,10 @@ export class ImagesService {
 
   async search(query: string, user: User) {
     return this.imageRepository.search(query, user);
+  }
+
+  async getPopularTags() {
+    return await this.imageRepository.getPopularTags();
   }
 
   private async preloadTagsByName(name: string) {

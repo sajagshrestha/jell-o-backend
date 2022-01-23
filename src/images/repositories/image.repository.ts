@@ -98,4 +98,18 @@ export class ImageRepository extends Repository<Image> {
       .take(take)
       .getMany();
   }
+
+  getPopularTags() {
+    return this.createQueryBuilder('image')
+      .where('image.created_at > :created_at', {
+        created_at: DateTime.now().minus({ weeks: 1 }).toISODate(), // make sure you set your own date here
+      })
+      .leftJoinAndSelect('image.tags', 'tag')
+      .groupBy('tag.id') // here is where we grup by the tag so we can count
+      .addGroupBy('tag.id')
+      .select('tag.id, tag.name, count(tag.id) as count') // here is where we count :)
+      .orderBy('count(tag.id)', 'DESC')
+      .take(10) // here is the limit
+      .getRawMany();
+  }
 }
