@@ -15,7 +15,9 @@ export class Like {
   @ManyToOne(() => User)
   user: User;
 
-  @ManyToOne(() => Image)
+  @ManyToOne(() => Image,{
+    onDelete: 'CASCADE',
+  })
   image: Image;
 
   @DeleteDateColumn()

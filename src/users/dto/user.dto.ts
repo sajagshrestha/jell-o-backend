@@ -18,4 +18,7 @@ export class UserDto {
 
   @ApiProperty()
   isFollowing?: boolean;
+
+  @ApiProperty()
+  postCount?: number;
 }

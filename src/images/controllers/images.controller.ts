@@ -11,6 +11,7 @@ import {
   Res,
   HttpStatus,
   HttpCode,
+  HttpException,
 } from '@nestjs/common';
 import { ImagesService } from '../services/images.service';
 import { CreateImageDto } from '../dto/create-image.dto';
@@ -91,24 +92,25 @@ export class ImagesController {
     @Param('id') id: string,
     @Body() updateImageDto: UpdateImageDto,
     @Req() req: RequestWithUser,
-    @Res() res: any,
   ) {
     const image = await this.imagesService.findOne(+id);
     const ability = this.caslAbilityFactory.createForUser(req.user);
 
     if (ability.cannot(Action.Update, image)) {
-      return res.status(HttpStatus.FORBIDDEN).send();
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
 
-    await this.imagesService.update(+id, updateImageDto);
+    const updatedImage = await this.imagesService.update(+id, updateImageDto);
 
-    return toImageDto(image);
+    return toImageDto(updatedImage);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard())
-  remove(@Param('id') id: string) {
-    return this.imagesService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.imagesService.remove(+id);
+
+    return { message: 'Successfully deleted image' };
   }
 
   @Post(':id/like')

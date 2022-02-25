@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { User } from 'src/users/entities/user.entity';
 import { Like } from 'typeorm';
 import { Tag } from '../entities/tag.entity';
 import { TagRepository } from '../repositories/tag.repository';
@@ -45,5 +46,11 @@ export class TagService {
     }));
 
     return tags;
+  }
+
+  async images(id: number, user: User) {
+    const images = await this.imageService.getImagesByTag(id, user);
+
+    return images;
   }
 }
