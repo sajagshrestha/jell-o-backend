@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { Comment } from 'src/comment/entities/comment.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
+  AfterLoad,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -29,6 +30,9 @@ export class Image {
 
   @Column('text', { nullable: false })
   thumbnailUrl: string;
+
+  @Column({ nullable: false })
+  uploaderId: number;
 
   @ManyToOne(() => User, {
     eager: true,
@@ -70,4 +74,9 @@ export class Image {
 
   @Column({ nullable: true, insert: false, select: false })
   isSaved: number;
+
+  // @AfterLoad()
+  // async loadUserId() {
+  //   this.uploaderId = this.uploader.id;
+  // }
 }

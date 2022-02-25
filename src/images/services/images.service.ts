@@ -16,6 +16,7 @@ import { UpdateImageDto } from '../dto/update-image.dto';
 import { Image } from '../entities/image.entity';
 import { Like } from '../entities/like.entity';
 import { SavedImage } from '../entities/savedImages.entity';
+import { Tag } from '../entities/tag.entity';
 import { ImageRepository } from '../repositories/image.repository';
 import { TagService } from './tags.service';
 
@@ -107,18 +108,23 @@ export class ImagesService {
       updateImageDto.tags.map((name) => this.preloadTagsByName(name)),
     );
 
-    const existingImage = await this.imageRepository.preload({
-      id: id,
-      ...updateImageDto,
-      tags: tags,
+    await this.imageRepository.update(id, {
+      caption: updateImageDto.caption,
+      url: updateImageDto.url,
+      thumbnailUrl: updateImageDto.thumbnailUrl,
     });
 
-    if (!existingImage) {
+    const image = await this.imageRepository.findOne(id);
+    image.tags = tags;
+
+    await this.imageRepository.save(image);
+
+    if (!image) {
       throw new NotFoundException('Image does not exists');
     }
-    await this.imageRepository.save(existingImage);
+    await this.imageRepository.save(image);
 
-    return existingImage;
+    return image;
   }
 
   async remove(id: number): Promise<Image> {
@@ -213,6 +219,10 @@ export class ImagesService {
 
   async getPopularTags() {
     return await this.imageRepository.getPopularTags();
+  }
+
+  async getImagesByTag(tagId: number, user: User) {
+    return await this.imageRepository.getImagesByTag(tagId, user);
   }
 
   private async preloadTagsByName(name: string) {

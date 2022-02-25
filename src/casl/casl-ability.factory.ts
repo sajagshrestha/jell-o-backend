@@ -29,7 +29,8 @@ export class CaslAbilityFactory {
       Ability<[Action, Subjects]>
     >(Ability as AbilityClass<AppAbility>);
 
-    cannot(Action.Update, Image, { uploader: user });
+    cannot(Action.Update, Image, { uploaderId: user.id });
+    can(Action.Update, Image, { uploaderId: user.id });
 
     return build({
       detectSubjectType: (item) =>

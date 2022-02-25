@@ -112,4 +112,12 @@ export class ImageRepository extends Repository<Image> {
       .take(10) // here is the limit
       .getRawMany();
   }
+
+  getImagesByTag(tagId: number, user: User) {
+    return this.baseQueryBuilder(user)
+      .innerJoinAndSelect('image.tags', 'tag', 'tag.id = :tagId', { tagId })
+      .orderBy('image.created_at', 'DESC')
+      .take(20)
+      .getMany();
+  }
 }

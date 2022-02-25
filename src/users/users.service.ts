@@ -151,15 +151,13 @@ export class UsersService {
     return images;
   }
 
-  async isFollowing(user: User, follower: User): Promise<boolean> {
-    const count = await this.followRepository.count({
+  async isFollowing(user: User, follower: User): Promise<number> {
+    return await this.followRepository.count({
       where: {
         following: user,
         follower: follower,
       },
     });
-
-    return count > 0;
   }
 
   async profile(user: User, currentUser: User) {
@@ -173,7 +171,7 @@ export class UsersService {
     return { userProfile: user, images };
   }
 
-  async search(query: string) {
-    return this.userRepository.search(query);
+  async search(query: string, user: User) {
+    return await this.userRepository.search(query, user);
   }
 }

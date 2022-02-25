@@ -23,10 +23,13 @@ export class Comment {
 
   @ManyToOne((type) => Image, (image: Image) => image.comments, {
     eager: true,
+    onDelete: 'CASCADE',
   })
   image: Image;
 
-  @ManyToOne((type) => Comment, (comment) => comment.replies)
+  @ManyToOne((type) => Comment, (comment) => comment.replies, {
+    onDelete: 'CASCADE',
+  })
   parent?: Comment;
 
   @OneToMany((type) => Comment, (comment) => comment.parent)

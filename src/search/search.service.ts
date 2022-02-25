@@ -12,7 +12,7 @@ export class SearchService {
 
   async search(query: string, user: User) {
     const images = await this.imageService.search(query, user);
-    const users = await this.userService.search(query);
+    const users = await this.userService.search(query, user);
 
     return {
       images,

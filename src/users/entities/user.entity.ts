@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { Image } from 'src/images/entities/image.entity';
 import { SavedImage } from 'src/images/entities/savedImages.entity';
 import {
+  AfterLoad,
   BeforeInsert,
   Column,
   Entity,
@@ -30,17 +31,21 @@ export class User {
   @OneToMany(() => SavedImage, (savedImage: SavedImage) => savedImage.user)
   savedImages: Promise<SavedImage[]>;
 
-  @OneToMany(() => Follow, (follow: Follow) => follow.following)
+  @OneToMany(() => Follow, (follow: Follow) => follow.follower)
   following: Promise<User[]>;
 
-  @OneToMany(() => Follow, (follow: Follow) => follow.follower)
+  @OneToMany(() => Follow, (follow: Follow) => follow.following)
   followers: Promise<User[]>;
+
+  /**Check image entity for more info */
+  @Column({ nullable: true, insert: false, select: false })
+  isFollowing: number;
 
   followerCount?: number;
 
   followingCount?: number;
 
-  isFollowing?: boolean;
+  postCount?: number;
 
   @BeforeInsert()
   async hashPassword() {
