@@ -94,7 +94,9 @@ export class ImageRepository extends Repository<Image> {
 
   search(query: string, user: User, take = 10) {
     return this.baseQueryBuilder(user)
+      .innerJoinAndSelect('image.tags', 'tag')
       .where('caption LIKE :query', { query: `%${query}%` })
+      .orWhere('tags.name LIKE :query', { query: `%${query}%` })
       .take(take)
       .getMany();
   }
