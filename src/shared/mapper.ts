@@ -29,7 +29,16 @@ export const toUserDto = (data: User): UserDto => {
 };
 
 export const toCommentDto = (data: Comment) => {
-  const { id, body, author, parent, replies, image, replies_count } = data;
+  const {
+    id,
+    body,
+    author,
+    parent,
+    replies,
+    image,
+    replies_count,
+    created_at,
+  } = data;
 
   const commentDto: CommentDto = {
     id,
@@ -39,6 +48,7 @@ export const toCommentDto = (data: Comment) => {
     replies: replies ? replies.map((reply) => toCommentDto(reply)) : null,
     imageId: image.id,
     replies_count: replies_count ?? null,
+    created_at: created_at,
   };
 
   return commentDto;

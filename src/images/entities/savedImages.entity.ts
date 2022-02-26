@@ -12,6 +12,7 @@ export class SavedImage {
 
   @ManyToOne(() => Image, {
     eager: true,
+    onDelete: 'CASCADE',
   })
   image: Image;
 }

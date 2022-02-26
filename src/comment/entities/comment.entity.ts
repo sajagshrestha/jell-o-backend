@@ -2,6 +2,7 @@ import { Image } from 'src/images/entities/image.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -34,6 +35,9 @@ export class Comment {
 
   @OneToMany((type) => Comment, (comment) => comment.parent)
   replies: Comment[];
+
+  @CreateDateColumn()
+  created_at: Date;
 
   replies_count: number;
 }
