@@ -74,9 +74,4 @@ export class Image {
 
   @Column({ nullable: true, insert: false, select: false })
   isSaved: number;
-
-  // @AfterLoad()
-  // async loadUserId() {
-  //   this.uploaderId = this.uploader.id;
-  // }
 }

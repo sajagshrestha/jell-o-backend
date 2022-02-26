@@ -19,4 +19,6 @@ export class CommentDto {
   replies?: CommentDto[];
 
   replies_count?: number;
+
+  created_at: Date;
 }
