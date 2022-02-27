@@ -6,6 +6,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Match } from 'src/auth/match.decorator';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -26,8 +27,8 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
+  @MinLength(4)
   @MaxLength(20)
-  @Matches('password')
+  @Match('password')
   confirmPassword: string;
 }
