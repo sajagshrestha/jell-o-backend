@@ -12,6 +12,7 @@ import { CaslModule } from 'src/casl/casl.module';
 import { TagRepository } from './repositories/tag.repository';
 import { TagService } from './services/tags.service';
 import { TagsController } from './controllers/tags.controller';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TagsController } from './controllers/tags.controller';
     forwardRef(() => AuthModule),
     forwardRef(() => CommentModule),
     forwardRef(() => UsersModule),
+    NotificationModule,
     TypeOrmModule.forFeature([
       ImageRepository,
       TagRepository,

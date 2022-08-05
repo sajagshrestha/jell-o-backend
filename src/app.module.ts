@@ -1,13 +1,15 @@
+import { EnvConfigModule } from '@app/env-config';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { EnvConfigModule } from '@app/env-config';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { ImagesModule } from './images/images.module';
-import { CommentModule } from './comment/comment.module';
 import { CaslModule } from './casl/casl.module';
+import { CommentModule } from './comment/comment.module';
+import { ImagesModule } from './images/images.module';
+import { NotificationModule } from './notification/notification.module';
 import { SearchModule } from './search/search.module';
+import { UsersModule } from './users/users.module';
 
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import dbConfig from './configs/db.config';
 
 @Module({
@@ -20,6 +22,10 @@ import dbConfig from './configs/db.config';
     CommentModule,
     CaslModule,
     SearchModule,
+    NotificationModule,
+    EventEmitterModule.forRoot({
+      wildcard: true,
+    }),
   ],
 })
 export class AppModule {}

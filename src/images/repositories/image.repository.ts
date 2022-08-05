@@ -45,8 +45,10 @@ export class ImageRepository extends Repository<Image> {
   }
 
   getFeed(user: User, followerIds: number[]) {
+    const userIds = [user.id, ...followerIds];
+    
     return this.baseQueryBuilder(user)
-      .where('image.uploader.id IN (:...followerIds)', { followerIds })
+      .where('image.uploader.id IN (:...userIds)', { userIds })
       .orderBy('image.updated_at', 'DESC')
       .getMany();
   }

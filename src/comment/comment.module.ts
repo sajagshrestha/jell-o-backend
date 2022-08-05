@@ -8,6 +8,7 @@ import { Comment } from './entities/comment.entity';
 import { CommentRepository } from './comment.repository';
 import { ImagesModule } from 'src/images/images.module';
 import { CaslModule } from 'src/casl/casl.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CaslModule } from 'src/casl/casl.module';
     forwardRef(() => AuthModule),
     forwardRef(() => ImagesModule),
     TypeOrmModule.forFeature([CommentRepository]),
+    NotificationModule,
   ],
   controllers: [CommentController],
   providers: [CommentService],

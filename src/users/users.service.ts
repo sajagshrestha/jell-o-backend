@@ -22,6 +22,9 @@ import { ImageRepository } from 'src/images/repositories/image.repository';
 import { Follow } from './entities/follow.entity';
 import { toImageDto } from 'src/shared/mapper';
 import { Image } from 'src/images/entities/image.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationType } from 'src/notification/notification.entity';
+import { NotificationEvent } from 'src/notification/notification.event';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +34,7 @@ export class UsersService {
     private readonly imageService: ImagesService,
     @InjectRepository(Follow)
     private readonly followRepository: Repository<Follow>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -113,6 +117,9 @@ export class UsersService {
       follower: user,
       following: following,
     });
+
+    this.eventEmitter.emit('user.follow', new NotificationEvent(NotificationType.FOLLOW, following, user));
+
   }
 
   async unFollowUser(user: User, following: User) {
