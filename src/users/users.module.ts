@@ -7,12 +7,14 @@ import { AuthModule } from 'src/auth/auth.module';
 import { ImagesModule } from 'src/images/images.module';
 import { UsersService } from 'src/users/users.service';
 import { Follow } from './entities/follow.entity';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
     forwardRef(() => ImagesModule),
     TypeOrmModule.forFeature([UserRepository, Follow]),
+    NotificationModule
   ],
   controllers: [UsersController],
   providers: [UsersService],

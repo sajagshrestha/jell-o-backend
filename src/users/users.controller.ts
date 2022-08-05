@@ -24,7 +24,7 @@ export class UsersController {
   @UseGuards(AuthGuard())
   async feed(@Req() req: RequestWithUser) {
     const images = await this.usersService.getUserFeeds(req.user);
-
+    
     return images.map((image) => toImageDto(image));
   }
 

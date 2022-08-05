@@ -4,6 +4,8 @@ import { ImageDto } from 'src/images/dto/image.dto';
 import { SavedImageDto } from 'src/images/dto/saved-image.dto';
 import { Image } from 'src/images/entities/image.entity';
 import { SavedImage } from 'src/images/entities/savedImages.entity';
+import { NotificationDto } from 'src/notification/notification.dto';
+import { Notification } from 'src/notification/notification.entity';
 import { UserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/entities/user.entity';
 
@@ -100,3 +102,28 @@ export const toSavedImageDto = (data: SavedImage) => {
 
   return savedImageDto;
 };
+
+export const toNotificationDto = (data: Notification) => {
+  
+  const {
+    id,
+    type,
+    user,
+    image,
+    invoker,
+    read,
+    created_at,
+  } = data;
+
+  const notificationDto: NotificationDto = {
+    id,
+    type,
+    user: toUserDto(user),
+    image: image ? toImageDto(image) : null,
+    invoker: toUserDto(invoker),
+    read: read,
+    created_at,
+  };
+
+  return notificationDto;
+}

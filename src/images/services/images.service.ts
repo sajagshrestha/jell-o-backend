@@ -2,11 +2,13 @@ import {
   forwardRef,
   Inject,
   Injectable,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentService } from 'src/comment/comment.service';
-import { UserDto } from 'src/users/dto/user.dto';
+import { NotificationType } from 'src/notification/notification.entity';
+import { NotificationEvent } from 'src/notification/notification.event';
 import { Follow } from 'src/users/entities/follow.entity';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -16,7 +18,6 @@ import { UpdateImageDto } from '../dto/update-image.dto';
 import { Image } from '../entities/image.entity';
 import { Like } from '../entities/like.entity';
 import { SavedImage } from '../entities/savedImages.entity';
-import { Tag } from '../entities/tag.entity';
 import { ImageRepository } from '../repositories/image.repository';
 import { TagService } from './tags.service';
 
@@ -33,6 +34,7 @@ export class ImagesService {
     private readonly likesRepository: Repository<Like>,
     @InjectRepository(SavedImage)
     private readonly savedImageRepository: Repository<SavedImage>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findOne(id: number): Promise<Image> {
@@ -75,9 +77,6 @@ export class ImagesService {
 
   async getFeedImages(user: User, following: Follow[]) {
     const followingIds = following.map((follow) => follow.following.id);
-    if (followingIds.length === 0) {
-      return [];
-    }
     const images = await this.imageRepository.getFeed(user, followingIds);
 
     return images;
@@ -205,6 +204,8 @@ export class ImagesService {
       return;
     }
 
+    this.eventEmitter.emit('image.like', new NotificationEvent(NotificationType.LIKE, image.uploader, user, image ));
+    
     await this.likesRepository.save({
       image,
       user,

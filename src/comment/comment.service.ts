@@ -4,8 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Image } from 'src/images/entities/image.entity';
 import { ImagesService } from 'src/images/services/images.service';
+import { NotificationType } from 'src/notification/notification.entity';
+import { NotificationEvent } from 'src/notification/notification.event';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 import { CommentRepository } from './comment.repository';
@@ -21,6 +24,7 @@ export class CommentService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => ImagesService))
     private readonly imageService: ImagesService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async create(
@@ -45,8 +49,12 @@ export class CommentService {
     });
     await this.commentRepository.save(comment);
 
+    this.eventEmitter.emit('image.comment', new NotificationEvent(NotificationType.COMMENT, image.uploader, author, image ));
+
     return comment;
   }
+
+  
 
   async findReplies(id: number): Promise<Comment[]> {
     const replies = await this.commentRepository.find({
